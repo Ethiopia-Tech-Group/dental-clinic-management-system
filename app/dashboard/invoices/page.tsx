@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import InvoiceModal from "@/components/dashboard/invoice-modal"
+
 import { mockInvoices, mockPatients, getVisibleInvoices } from "@/data/mockData"
 import { MockInvoice } from "@/data/mockData"
 import { useBranch } from "@/contexts/BranchContext"
@@ -24,8 +24,7 @@ export default function InvoicesPage() {
   const [filteredInvoices, setFilteredInvoices] = useState<Invoice[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
-  const [selectedInvoice, setSelectedInvoice] = useState<MockInvoice | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  // Removed modal state
 
   useEffect(() => {
     fetchInvoices()
@@ -69,42 +68,7 @@ export default function InvoicesPage() {
     }
   }
 
-  const handleCreateInvoice = () => {
-    setSelectedInvoice(null)
-    setIsModalOpen(true)
-  }
-
-  const handleEditInvoice = (invoice: Invoice) => {
-    // Convert to MockInvoice type for the modal
-    const mockInvoice: MockInvoice = {
-      id: invoice.id,
-      invoice_number: invoice.invoice_number,
-      patient_id: invoice.patient_id,
-      doctor_id: invoice.doctor_id,
-      branch_id: invoice.branch_id,
-      treatment_id: invoice.treatment_id,
-      subtotal: invoice.subtotal,
-      tax: invoice.tax,
-      discount: invoice.discount,
-      total_amount: invoice.total_amount,
-      amount_paid: invoice.amount_paid,
-      balance_remaining: invoice.balance_remaining,
-      status: invoice.status,
-      invoice_date: invoice.invoice_date,
-      due_date: invoice.due_date,
-      created_at: invoice.created_at,
-      updated_at: invoice.updated_at
-    }
-    
-    setSelectedInvoice(mockInvoice)
-    setIsModalOpen(true)
-  }
-
-  const handleSaveInvoice = () => {
-    setIsModalOpen(false)
-    setSelectedInvoice(null)
-    fetchInvoices()
-  }
+  // Removed modal handlers
 
   const statusColors: Record<string, string> = {
     paid: "bg-green-100 text-green-800",
@@ -185,13 +149,13 @@ export default function InvoicesPage() {
                         </TableCell>
                         <TableCell>
                           <div className="flex gap-2">
-                            <button
-                              onClick={() => handleEditInvoice(invoice)}
+                            <Link
+                              href={`/dashboard/invoices/${invoice.id}`}
                               className="p-2 hover:bg-primary/10 rounded transition"
-                              title="Edit"
+                              title="View Details"
                             >
                               <Eye size={16} className="text-primary" />
-                            </button>
+                            </Link>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -204,16 +168,7 @@ export default function InvoicesPage() {
         </CardContent>
       </Card>
 
-      {isModalOpen && (
-        <InvoiceModal
-          invoice={selectedInvoice}
-          onClose={() => {
-            setIsModalOpen(false)
-            setSelectedInvoice(null)
-          }}
-          onSave={handleSaveInvoice}
-        />
-      )}
+      {/* Removed InvoiceModal */}
     </div>
   )
 }

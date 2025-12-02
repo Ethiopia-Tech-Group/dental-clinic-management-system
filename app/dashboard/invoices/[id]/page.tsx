@@ -42,7 +42,7 @@ export default function InvoiceDetailPage() {
   const [treatmentServices, setTreatmentServices] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [paymentForm, setPaymentForm] = useState({ amount: "", method: "" });
+  // Removed payment form state
 
   // Get user role from localStorage
   useEffect(() => {
@@ -112,75 +112,7 @@ export default function InvoiceDetailPage() {
     }
   };
 
-  // Helper function to record a payment
-  const recordPayment = async (amount: number, method: string) => {
-    if (!invoice) return;
-    
-    try {
-      // Find invoice in mock data
-      const invoiceIndex = mockInvoices.findIndex(inv => inv.id === invoice.id);
-      if (invoiceIndex !== -1) {
-        const updatedInvoice = {
-          ...mockInvoices[invoiceIndex],
-          amount_paid: parseFloat((mockInvoices[invoiceIndex].amount_paid + amount).toFixed(2)),
-          balance_remaining: parseFloat((mockInvoices[invoiceIndex].total_amount - mockInvoices[invoiceIndex].amount_paid - amount).toFixed(2)),
-          updated_at: new Date().toISOString()
-        };
-        
-        // Update status based on balance
-        if (updatedInvoice.balance_remaining <= 0) {
-          updatedInvoice.status = "paid";
-        } else if (updatedInvoice.amount_paid > 0) {
-          updatedInvoice.status = "partial";
-        } else {
-          updatedInvoice.status = "unpaid";
-        }
-        
-        // Update in mock data
-        mockInvoices[invoiceIndex] = updatedInvoice;
-        
-        // Update local state
-        setInvoice(updatedInvoice);
-        
-        // Reset payment form
-        setPaymentForm({ amount: "", method: "" });
-        
-        toast.success("Payment recorded successfully");
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "An error occurred";
-      toast.error(message);
-    }
-  };
-
-  const handleRecordPayment = async () => {
-    if (!paymentForm.amount || !paymentForm.method) {
-      toast.error("Please fill in all payment details");
-      return;
-    }
-    
-    const amount = parseFloat(paymentForm.amount);
-    if (isNaN(amount) || amount <= 0) {
-      toast.error("Please enter a valid payment amount");
-      return;
-    }
-    
-    if (amount > (invoice?.balance_remaining || 0)) {
-      toast.error("Payment amount exceeds balance");
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    try {
-      await recordPayment(amount, paymentForm.method);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "An error occurred";
-      toast.error(message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // Removed payment functions
 
   const statusColors: Record<string, string> = {
     paid: "bg-green-100 text-green-800",
@@ -244,20 +176,19 @@ export default function InvoiceDetailPage() {
                   {invoice.status}
                 </Badge>
                 {(userRole === "receptionist" || userRole === "admin" || userRole === "accountant") && (
-                  <Select
-                    value={invoice.status}
-                    onValueChange={updateInvoiceStatus}
+                  <Button 
+                    onClick={() => {
+                      // Cycle through statuses: unpaid -> partial -> paid -> unpaid
+                      const statuses = ['unpaid', 'partial', 'paid'];
+                      const currentIndex = statuses.indexOf(invoice.status);
+                      const nextIndex = (currentIndex + 1) % statuses.length;
+                      updateInvoiceStatus(statuses[nextIndex]);
+                    }}
                     disabled={isLoading}
+                    className="bg-primary hover:bg-primary-dark"
                   >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="unpaid">Unpaid</SelectItem>
-                      <SelectItem value="partial">Partial</SelectItem>
-                      <SelectItem value="paid">Paid</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    Update Status
+                  </Button>
                 )}
               </div>
             </div>
@@ -321,50 +252,23 @@ export default function InvoiceDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Payment Section for Receptionist/Admin/Accountant */}
+        {/* Status Update Button for Receptionist/Admin/Accountant */}
         {(userRole === "receptionist" || userRole === "admin" || userRole === "accountant") && (
           <Card>
-            <CardHeader>
-              <CardTitle>Record Payment</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Amount ($)</Label>
-                  <Input 
-                    type="number" 
-                    step="0.01" 
-                    min="0" 
-                    max={invoice.balance_remaining}
-                    value={paymentForm.amount}
-                    onChange={(e) => setPaymentForm({...paymentForm, amount: e.target.value})}
-                    placeholder="0.00"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Payment Method</Label>
-                  <Select value={paymentForm.method} onValueChange={(value) => setPaymentForm({...paymentForm, method: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select method" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cash">Cash</SelectItem>
-                      <SelectItem value="card">Credit Card</SelectItem>
-                      <SelectItem value="check">Check</SelectItem>
-                      <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-end">
-                  <Button 
-                    className="w-full bg-primary hover:bg-primary-dark"
-                    onClick={handleRecordPayment}
-                    disabled={!paymentForm.amount || !paymentForm.method || isLoading}
-                  >
-                    {isLoading ? "Recording..." : "Record Payment"}
-                  </Button>
-                </div>
-              </div>
+            <CardContent className="pt-6">
+              <Button 
+                onClick={() => {
+                  // Cycle through statuses: unpaid -> partial -> paid -> unpaid
+                  const statuses = ['unpaid', 'partial', 'paid'];
+                  const currentIndex = statuses.indexOf(invoice.status);
+                  const nextIndex = (currentIndex + 1) % statuses.length;
+                  updateInvoiceStatus(statuses[nextIndex]);
+                }}
+                disabled={isLoading}
+                className="bg-primary hover:bg-primary-dark"
+              >
+                Update Invoice Status
+              </Button>
             </CardContent>
           </Card>
         )}
