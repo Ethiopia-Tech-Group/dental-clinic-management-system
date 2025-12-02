@@ -34,7 +34,7 @@ export interface MockDoctor {
   qualifications: string
   experience_years: number
   is_active: boolean
-  profile_picture_url?: string
+  profile_picture_url: string
   branch_id: string
   created_at: string
   updated_at: string
