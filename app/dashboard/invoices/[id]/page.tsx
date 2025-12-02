@@ -10,7 +10,6 @@ import { mockInvoices, mockPatients, mockDoctors, mockTreatmentServices, mockSer
 import { useBranch } from "@/contexts/BranchContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 
 interface Invoice {
   id: string;
@@ -42,7 +41,6 @@ export default function InvoiceDetailPage() {
   const [treatmentServices, setTreatmentServices] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
-  // Removed payment form state
 
   // Get user role from localStorage
   useEffect(() => {
@@ -111,8 +109,6 @@ export default function InvoiceDetailPage() {
       toast.error(message);
     }
   };
-
-  // Removed payment functions
 
   const statusColors: Record<string, string> = {
     paid: "bg-green-100 text-green-800",

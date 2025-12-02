@@ -57,7 +57,19 @@ interface TreatmentService {
   price_at_time: number;
   created_at: string;
 }
-
+export interface MockXRayRequest {
+  id: string
+  patient_id: string
+  treatment_id: string
+  doctor_id: string
+  branch_id: string
+  status: 'requested' | 'completed'
+  requested_at: string
+  completed_at?: string
+  notes?: string
+  created_at: string
+  updated_at: string
+}
 interface XRayFile {
   id: string;
   patient_id: string;
@@ -366,31 +378,28 @@ export default function TreatmentDetailPage() {
       toast.error("You don't have permission to request X-rays for this treatment");
       return;
     }
-    
+  
     if (!treatment || !userId) return;
-    
+  
     setIsLoading(true);
-    
+  
     try {
-      // Create a new X-ray request
-      const newXRayRequest = {
+      const newXRayRequest: MockXRayRequest = {
         id: `xray-request-${Date.now()}`,
         patient_id: treatment.patient_id,
         treatment_id: treatment.id,
         doctor_id: treatment.doctor_id,
         branch_id: treatment.branch_id,
-        status: 'requested',
+        status: "requested",
         requested_at: new Date().toISOString(),
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       };
-      
-      // Add to mock data
+  
       mockXRayRequests.push(newXRayRequest);
-      
+  
       toast.success("X-ray request sent to technician successfully");
-      
-      // Add a notification or log entry for the X-ray request
+  
       console.log(`X-ray requested for treatment ${treatment.id} by doctor ${userId}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : "An error occurred";
@@ -399,6 +408,7 @@ export default function TreatmentDetailPage() {
       setIsLoading(false);
     }
   };
+  
 
   const handleSaveDoctorNotes = async () => {
     if (!canEditTreatment()) {
