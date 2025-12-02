@@ -551,14 +551,16 @@ export default function PatientDetailPage() {
                         
                         <div className="mt-3 pt-3 border-t flex justify-between items-center">
                           <p className="font-medium">${treatment.total_cost.toFixed(2)}</p>
-                          <Button 
-                            onClick={() => router.push(`/dashboard/treatments/${treatment.id}`)}
-                            variant="outline" 
-                            size="sm"
-                            className="text-primary hover:bg-primary/10"
-                          >
-                            View Treatment
-                          </Button>
+                          {userRole !== "receptionist" && (
+                            <Button 
+                              onClick={() => router.push(`/dashboard/treatments/${treatment.id}`)}
+                              variant="outline" 
+                              size="sm"
+                              className="text-primary hover:bg-primary/10"
+                            >
+                              View Treatment
+                            </Button>
+                          )}
                         </div>
                       </div>
                     )
