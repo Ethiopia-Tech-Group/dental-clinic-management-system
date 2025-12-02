@@ -116,15 +116,9 @@ export default function InvoicesPage() {
     <div className="p-6 lg:p-8">
       {/* Header */}
       <div className="mb-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-secondary">Invoices</h1>
-            <p className="text-secondary/60 mt-2">View and manage patient invoices</p>
-          </div>
-          <Button onClick={handleCreateInvoice} className="bg-primary hover:bg-primary-dark">
-            <Plus size={18} className="mr-2" />
-            Create Invoice
-          </Button>
+        <div>
+          <h1 className="text-3xl font-bold text-secondary">Invoices</h1>
+          <p className="text-secondary/60 mt-2">View and manage patient invoices</p>
         </div>
       </div>
 
@@ -165,7 +159,6 @@ export default function InvoicesPage() {
                     <TableHead>Date</TableHead>
                     <TableHead>Total</TableHead>
                     <TableHead>Paid</TableHead>
-                    <TableHead>Balance</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -173,7 +166,7 @@ export default function InvoicesPage() {
                 <TableBody>
                   {filteredInvoices.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-secondary/60">
+                      <TableCell colSpan={7} className="text-center py-8 text-secondary/60">
                         No invoices found
                       </TableCell>
                     </TableRow>
@@ -187,9 +180,6 @@ export default function InvoicesPage() {
                         <TableCell>{new Date(invoice.invoice_date).toLocaleDateString()}</TableCell>
                         <TableCell>${invoice.total_amount.toFixed(2)}</TableCell>
                         <TableCell className="text-green-600 font-medium">${invoice.amount_paid.toFixed(2)}</TableCell>
-                        <TableCell className="text-red-600 font-medium">
-                          ${invoice.balance_remaining.toFixed(2)}
-                        </TableCell>
                         <TableCell>
                           <Badge className={statusColors[invoice.status] || "bg-gray-100"}>{invoice.status}</Badge>
                         </TableCell>

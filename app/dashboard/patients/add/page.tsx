@@ -7,8 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { mockPatients, genCardId } from "@/data/mockData";
+import { mockPatients, mockDoctors, genCardId } from "@/data/mockData";
 import { useBranch } from "@/contexts/BranchContext";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function AddPatientPage() {
   const router = useRouter();
@@ -21,10 +22,19 @@ export default function AddPatientPage() {
     date: new Date().toISOString().split('T')[0], // Default to today
     clinical_finding: "",
     phone: "",
+    assigned_doctor_id: "", // Add doctor assignment field
   });
   const [cardId, setCardId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [doctors, setDoctors] = useState<any[]>([]); // State for doctors
+
+  // Load doctors when component mounts
+  useEffect(() => {
+    // Filter doctors by current branch
+    const branchDoctors = mockDoctors.filter(doctor => doctor.branch_id === currentBranch?.id);
+    setDoctors(branchDoctors);
+  }, [currentBranch]);
 
   // Generate a card ID when the component mounts
   useEffect(() => {
@@ -74,6 +84,7 @@ export default function AddPatientPage() {
         is_active: true,
         branch_id: currentBranch?.id || "",
         card_id: cardId,
+        assigned_doctor_id: formData.assigned_doctor_id || "",
         clinical_finding: formData.clinical_finding,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -156,6 +167,37 @@ export default function AddPatientPage() {
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              id="phone"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* Doctor Assignment Field */}
+          <div className="space-y-2">
+            <Label htmlFor="assignedDoctor">Assign Doctor</Label>
+            <Select
+              value={formData.assigned_doctor_id}
+              onValueChange={(value) => setFormData({ ...formData, assigned_doctor_id: value })}
+              disabled={isLoading}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a doctor" />
+              </SelectTrigger>
+              <SelectContent>
+                {doctors.map((doctor) => (
+                  <SelectItem key={doctor.id} value={doctor.id}>
+                    Dr. {doctor.first_name} {doctor.last_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="date">Visit Date</Label>
             <Input
               id="date"
@@ -175,16 +217,6 @@ export default function AddPatientPage() {
               disabled={isLoading}
               rows={3}
               placeholder="Enter clinical findings..."
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              disabled={isLoading}
             />
           </div>
 

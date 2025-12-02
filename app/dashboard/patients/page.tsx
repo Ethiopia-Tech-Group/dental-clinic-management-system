@@ -148,15 +148,17 @@ export default function PatientsPage() {
           <h1 className="text-3xl font-bold text-secondary">Patient Management</h1>
           <p className="text-secondary/60 mt-2">Manage patient records and information</p>
         </div>
-        <Button
-          onClick={() => {
-            // Navigate to add patient page
-            router.push("/dashboard/patients/add")
-          }}
-          className="bg-primary hover:bg-primary-dark text-white gap-2"
-        >
-          <Plus size={18} /> Add Patient
-        </Button>
+        {userRole !== "doctor" && (
+          <Button
+            onClick={() => {
+              // Navigate to add patient page
+              router.push("/dashboard/patients/add")
+            }}
+            className="bg-primary hover:bg-primary-dark text-white gap-2"
+          >
+            <Plus size={18} /> Add Patient
+          </Button>
+        )}
       </div>
 
       {/* Search */}

@@ -51,10 +51,26 @@ export default function TreatmentsPage() {
   const [filteredTreatments, setFilteredTreatments] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
+  const [userRole, setUserRole] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Get user role and user ID from localStorage
+  useEffect(() => {
+    const sessionStr = localStorage.getItem("userSession")
+    if (sessionStr) {
+      try {
+        const session = JSON.parse(sessionStr)
+        setUserRole(session.user.role)
+        setUserId(session.user.id)
+      } catch (error) {
+        console.error("Error parsing session:", error)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     fetchTreatments()
-  }, [currentBranch]) // Add currentBranch as dependency
+  }, [currentBranch, userRole, userId]) // Add currentBranch as dependency
 
   useEffect(() => {
     const filtered = treatments.filter(
@@ -75,6 +91,12 @@ export default function TreatmentsPage() {
       let filteredTreatments = mockTreatments
       if (currentBranch?.id) {
         filteredTreatments = getVisibleTreatments({ selectedBranchId: currentBranch.id, mockTreatments })
+      }
+      
+      // Filter treatments by doctor if user is a doctor
+      if (userRole === 'doctor' && userId) {
+        const doctorId = `doctor-${userId.split('-')[1] || '1'}`;
+        filteredTreatments = filteredTreatments.filter(t => t.doctor_id === doctorId);
       }
       
       // Use mock data with enriched patient and doctor information
@@ -129,14 +151,16 @@ export default function TreatmentsPage() {
           <h1 className="text-3xl font-bold text-secondary">Treatment Records</h1>
           <p className="text-secondary/60 mt-2">Manage patient treatment records</p>
         </div>
-        <Button
-          onClick={() => {
-            router.push("/dashboard/treatments/add")
-          }}
-          className="bg-primary hover:bg-primary-dark text-white gap-2"
-        >
-          <Plus size={18} /> New Treatment
-        </Button>
+        {userRole !== "doctor" && (
+          <Button
+            onClick={() => {
+              router.push("/dashboard/treatments/add")
+            }}
+            className="bg-primary hover:bg-primary-dark text-white gap-2"
+          >
+            <Plus size={18} /> New Treatment
+          </Button>
+        )}
       </div>
 
       {/* Search */}
@@ -209,12 +233,15 @@ export default function TreatmentsPage() {
                             >
                               <Eye size={16} className="text-primary" />
                             </Link>
-                            <Link
-                              href={`/dashboard/treatments/edit/${treatment.id}`}
-                              className="p-2 hover:bg-primary/10 rounded transition"
-                            >
-                              <Edit2 size={16} className="text-primary" />
-                            </Link>
+                            {(userRole === "receptionist" || userRole === "admin" || userRole === "super_admin" || 
+                              (userRole === "doctor" && treatment.doctor_id === `doctor-${userId?.split('-')[1] || '1'}`)) && (
+                              <Link
+                                href={`/dashboard/treatments/edit/${treatment.id}`}
+                                className="p-2 hover:bg-primary/10 rounded transition"
+                              >
+                                <Edit2 size={16} className="text-primary" />
+                              </Link>
+                            )}
                             <button
                               onClick={() => handleDelete(treatment.id)}
                               className="p-2 hover:bg-red-50 rounded transition"

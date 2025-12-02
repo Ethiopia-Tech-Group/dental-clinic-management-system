@@ -19,6 +19,7 @@ export interface MockPatient {
   is_active: boolean
   branch_id: string
   card_id?: string // Add card_id field
+  assigned_doctor_id?: string // Add assigned doctor field
   created_at: string
   updated_at: string
 }
@@ -35,6 +36,20 @@ export interface MockDoctor {
   is_active: boolean
   profile_picture_url?: string
   branch_id: string
+  created_at: string
+  updated_at: string
+}
+
+export interface MockXRayRequest {
+  id: string
+  patient_id: string
+  treatment_id: string
+  doctor_id: string
+  branch_id: string
+  status: 'requested' | 'completed'
+  requested_at: string
+  completed_at?: string
+  notes?: string
   created_at: string
   updated_at: string
 }
@@ -174,14 +189,9 @@ export function getVisiblePatients({ role, userId, selectedBranchId, mockPatient
 }) {
   let patients = mockPatients.filter(p => p.branch_id === selectedBranchId);
   if (role === 'doctor') {
-    // Filter by assigned doctor
-    patients = patients.filter(p => {
-      // In a real app, this would check treatment records or direct assignment
-      // For mock data, we'll simulate this by checking if the patient is assigned to this doctor
-      const assignedDoctorId = `doctor-${userId.split('-')[1] || '1'}`;
-      return p.id.includes(assignedDoctorId.replace('doctor-', 'patient-')) || 
-             p.id === `patient-${userId.split('-')[1] || '1'}`;
-    });
+    // Filter by assigned doctor using the assigned_doctor_id field
+    const doctorId = `doctor-${userId.split('-')[1] || '1'}`;
+    patients = patients.filter(p => p.assigned_doctor_id === doctorId);
   }
   return patients;
 }
@@ -358,6 +368,7 @@ export const mockPatients: MockPatient[] = [
     is_active: true,
     branch_id: "branch-1",
     card_id: generateUniqueCardId(),
+    assigned_doctor_id: "doctor-1",
     created_at: "2023-01-01T00:00:00Z",
     updated_at: "2023-01-01T00:00:00Z"
   },
@@ -381,6 +392,7 @@ export const mockPatients: MockPatient[] = [
     is_active: true,
     branch_id: "branch-1",
     card_id: generateUniqueCardId(),
+    assigned_doctor_id: "doctor-2",
     created_at: "2023-01-01T00:00:00Z",
     updated_at: "2023-01-01T00:00:00Z"
   },
@@ -404,6 +416,31 @@ export const mockPatients: MockPatient[] = [
     is_active: true,
     branch_id: "branch-2",
     card_id: generateUniqueCardId(),
+    assigned_doctor_id: "doctor-3",
+    created_at: "2023-01-01T00:00:00Z",
+    updated_at: "2023-01-01T00:00:00Z"
+  },
+  {
+    id: "patient-4",
+    first_name: "Sarah",
+    last_name: "Miller",
+    email: "sarah.miller@example.com",
+    phone: "+1 (555) 444-5555",
+    date_of_birth: "1988-12-15",
+    gender: "female",
+    address: "789 Elm Street",
+    city: "Smile City",
+    postal_code: "SC54321",
+    emergency_contact_name: "James Miller",
+    emergency_contact_phone: "+1 (555) 444-6666",
+    medical_history: "No major health issues",
+    dental_history: "Regular cleanings",
+    allergies: "None",
+    current_medications: "None",
+    is_active: true,
+    branch_id: "branch-1",
+    card_id: generateUniqueCardId(),
+    assigned_doctor_id: "doctor-2",
     created_at: "2023-01-01T00:00:00Z",
     updated_at: "2023-01-01T00:00:00Z"
   }
@@ -486,6 +523,18 @@ export const mockTreatments: MockTreatment[] = [
     total_cost: 150.00,
     created_at: "2023-06-16T14:00:00Z",
     updated_at: "2023-06-16T14:00:00Z"
+  },
+  {
+    id: "treatment-3",
+    patient_id: "patient-4",
+    doctor_id: "doctor-2",
+    branch_id: "branch-1",
+    status: "pending",
+    treatment_date: "2023-06-20T10:00:00Z",
+    notes: "Initial consultation and examination",
+    total_cost: 100.00,
+    created_at: "2023-06-20T10:00:00Z",
+    updated_at: "2023-06-20T10:00:00Z"
   }
 ]
 
@@ -513,6 +562,14 @@ export const mockTreatmentServices: MockTreatmentService[] = [
     quantity: 1,
     price_at_time: 300.00,
     created_at: "2023-06-16T14:00:00Z"
+  },
+  {
+    id: "ts-4",
+    treatment_id: "treatment-3",
+    service_id: "service-1",
+    quantity: 1,
+    price_at_time: 75.00,
+    created_at: "2023-06-20T10:00:00Z"
   }
 ]
 
@@ -554,6 +611,25 @@ export const mockInvoices: MockInvoice[] = [
     due_date: "2023-07-16T14:00:00Z",
     created_at: "2023-06-16T14:00:00Z",
     updated_at: "2023-06-16T14:00:00Z"
+  },
+  {
+    id: "invoice-3",
+    invoice_number: "INV-2023-003",
+    patient_id: "patient-4",
+    doctor_id: "doctor-2",
+    branch_id: "branch-1",
+    treatment_id: "treatment-3",
+    subtotal: 75.00,
+    tax: 7.50,
+    discount: 0.00,
+    total_amount: 82.50,
+    amount_paid: 0.00,
+    balance_remaining: 82.50,
+    status: "unpaid",
+    invoice_date: "2023-06-20T10:00:00Z",
+    due_date: "2023-07-20T10:00:00Z",
+    created_at: "2023-06-20T10:00:00Z",
+    updated_at: "2023-06-20T10:00:00Z"
   }
 ]
 
@@ -577,6 +653,20 @@ export const mockPayments: MockPayment[] = [
     notes: "Partial payment",
     created_by: "user-4",
     created_at: "2023-06-16T14:30:00Z"
+  }
+]
+
+export const mockXRayRequests: MockXRayRequest[] = [
+  {
+    id: "xray-request-1",
+    patient_id: "patient-3",
+    treatment_id: "treatment-3",
+    doctor_id: "doctor-2",
+    branch_id: "branch-1",
+    status: "requested",
+    requested_at: "2023-06-20T09:00:00Z",
+    created_at: "2023-06-20T09:00:00Z",
+    updated_at: "2023-06-20T09:00:00Z"
   }
 ]
 
@@ -631,6 +721,16 @@ export const mockVisits: MockVisit[] = [
     notes: "Monthly braces checkup",
     created_at: "2023-06-16T14:00:00Z",
     updated_at: "2023-06-16T14:00:00Z"
+  },
+  {
+    id: "visit-3",
+    patient_id: "patient-4",
+    doctor_id: "doctor-2",
+    branch_id: "branch-1",
+    visit_date: "2023-06-20T10:00:00Z",
+    notes: "Initial consultation",
+    created_at: "2023-06-20T10:00:00Z",
+    updated_at: "2023-06-20T10:00:00Z"
   }
 ]
 

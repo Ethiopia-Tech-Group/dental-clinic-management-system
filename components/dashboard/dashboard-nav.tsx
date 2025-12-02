@@ -23,8 +23,8 @@ const navItems: NavItem[] = [
   { label: "Services", href: "/dashboard/services", roles: ["super_admin", "admin", "branch_manager"] },
   { label: "Treatments", href: "/dashboard/treatments", roles: ["super_admin", "admin", "doctor", "branch_manager"] },
   { label: "Invoices", href: "/dashboard/invoices", roles: ["super_admin", "admin", "receptionist", "accountant", "branch_manager"] },
-  { label: "Audit Logs", href: "/dashboard/audit-logs", roles: ["super_admin", "accountant"] },
-  { label: "Reports", href: "/dashboard/reports", roles: ["super_admin", "admin", "accountant", "branch_manager"] },
+  // { label: "Audit Logs", href: "/dashboard/audit-logs", roles: ["super_admin", "accountant"] },
+  // { label: "Reports", href: "/dashboard/reports", roles: ["super_admin", "admin", "accountant", "branch_manager"] },
   { label: "Settings", href: "/dashboard/settings", roles: ["super_admin", "admin", "branch_manager"] },
 ]
 

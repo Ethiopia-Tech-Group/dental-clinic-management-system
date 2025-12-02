@@ -27,6 +27,23 @@ export default function EditTreatmentPage() {
   const [doctors, setDoctors] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [treatment, setTreatment] = useState<any>(null);
+
+  // Get user role and ID from localStorage
+  useEffect(() => {
+    const sessionStr = localStorage.getItem("userSession");
+    if (sessionStr) {
+      try {
+        const session = JSON.parse(sessionStr);
+        setUserRole(session.user.role);
+        setUserId(session.user.id);
+      } catch (error) {
+        console.error("Error parsing session:", error);
+      }
+    }
+  }, []);
 
   // Load data when component mounts
   useEffect(() => {
@@ -36,15 +53,16 @@ export default function EditTreatmentPage() {
     
     // Load treatment data if editing
     if (id) {
-      const treatment = mockTreatments.find(t => t.id === id);
-      if (treatment) {
+      const foundTreatment = mockTreatments.find(t => t.id === id);
+      if (foundTreatment) {
+        setTreatment(foundTreatment);
         setFormData({
-          patient_id: treatment.patient_id || "",
-          doctor_id: treatment.doctor_id || "",
-          treatment_date: treatment.treatment_date ? new Date(treatment.treatment_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-          notes: treatment.notes || "",
-          status: treatment.status || "pending",
-          total_cost: treatment.total_cost?.toString() || "",
+          patient_id: foundTreatment.patient_id || "",
+          doctor_id: foundTreatment.doctor_id || "",
+          treatment_date: foundTreatment.treatment_date ? new Date(foundTreatment.treatment_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+          notes: foundTreatment.notes || "",
+          status: foundTreatment.status || "pending",
+          total_cost: foundTreatment.total_cost?.toString() || "",
         });
       } else {
         toast.error("Treatment not found");
@@ -53,8 +71,41 @@ export default function EditTreatmentPage() {
     }
   }, [id, router]);
 
+  // Check if user has permission to edit this treatment
+  const canEditTreatment = () => {
+    if (!userRole || !userId || !treatment) return false;
+    
+    // Receptionist, admin, and super_admin can always edit
+    if (userRole === "receptionist" || userRole === "admin" || userRole === "super_admin") {
+      return true;
+    }
+    
+    // Doctor can only edit treatments assigned to them
+    if (userRole === "doctor") {
+      return treatment.doctor_id === `doctor-${userId.split('-')[1] || '1'}`;
+    }
+    
+    return false;
+  };
+
+  // Redirect if user doesn't have permission
+  useEffect(() => {
+    if (treatment && userRole && userId) {
+      if (!canEditTreatment()) {
+        toast.error("You don't have permission to edit this treatment");
+        router.push("/dashboard/treatments");
+      }
+    }
+  }, [treatment, userRole, userId, router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Double-check permission before submitting
+    if (!canEditTreatment()) {
+      toast.error("You don't have permission to edit this treatment");
+      return;
+    }
     
     // Validate required fields
     if (!formData.patient_id) {

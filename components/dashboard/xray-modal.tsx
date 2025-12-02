@@ -40,9 +40,10 @@ interface XrayModalProps {
   patients: Patient[]
   treatments: Treatment[]
   fetchTreatments: (patientId: string) => void
+  xrayRequest?: any // Optional X-ray request data
 }
 
-export default function XrayModal({ xray, onClose, onSave, patients, treatments, fetchTreatments }: XrayModalProps) {
+export default function XrayModal({ xray, onClose, onSave, patients, treatments, fetchTreatments, xrayRequest }: XrayModalProps) {
   const [formData, setFormData] = useState({
     patient_id: "",
     file_type: "xray",
@@ -65,8 +66,16 @@ export default function XrayModal({ xray, onClose, onSave, patients, treatments,
         treatment_id: xray.treatment_id || "",
       })
       setPreviewUrl(xray.file_url || null)
+    } else if (xrayRequest) {
+      // Pre-fill form with X-ray request data
+      setFormData({
+        patient_id: xrayRequest.patient_id || "",
+        file_type: "xray",
+        description: `X-ray for treatment ${xrayRequest.treatment_id?.substring(0, 8) || ''}`,
+        treatment_id: xrayRequest.treatment_id || "",
+      })
     }
-  }, [xray])
+  }, [xray, xrayRequest])
 
   useEffect(() => {
     if (formData.patient_id && !xray) {
@@ -118,10 +127,11 @@ export default function XrayModal({ xray, onClose, onSave, patients, treatments,
     
     setIsLoading(true)
     setError(null)
+    setUploading(true)
 
     try {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500))
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
       // In a real app, this would save to the database
       // For now, we'll just show a success message

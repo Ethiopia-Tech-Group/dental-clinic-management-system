@@ -15,6 +15,8 @@ const mockUsers = [
   { email: "superadmin@dentalclinic.com", password: "password", role: "super_admin", name: "Super Admin" },
   { email: "admin@dentalclinic.com", password: "password", role: "admin", name: "Admin User" },
   { email: "doctor@dentalclinic.com", password: "password", role: "doctor", name: "Dr. Smith" },
+  { email: "dr.john.doe@dentalclinic.com", password: "password123", role: "doctor", name: "Dr. John Doe" },
+  { email: "dr.emily.smith@dentalclinic.com", password: "password123", role: "doctor", name: "Dr. Emily Smith" },
   { email: "receptionist@dentalclinic.com", password: "password", role: "receptionist", name: "Receptionist" },
   { email: "accountant@dentalclinic.com", password: "password", role: "accountant", name: "Accountant" },
   { email: "xray@dentalclinic.com", password: "password", role: "xray_technician", name: "X-Ray Tech" },
@@ -45,9 +47,25 @@ export default function LoginPage() {
       }
 
       // Store user session in localStorage
+      // For doctors, use the user_id that matches their mockDoctors entry
+      let userId = `user-${Date.now()}`;
+      if (user.role === 'doctor') {
+        // Map specific doctor emails to their user_ids
+        if (user.email === 'dr.john.doe@dentalclinic.com') {
+          userId = 'user-1';
+        } else if (user.email === 'dr.emily.smith@dentalclinic.com') {
+          userId = 'user-2';
+        } else if (user.email === 'dr.michael.johnson@dentalclinic.com') {
+          userId = 'user-3';
+        } else {
+          // Default doctor user_id
+          userId = 'user-2';
+        }
+      }
+      
       const session = {
         user: {
-          id: `user-${Date.now()}`,
+          id: userId,
           email: user.email,
           role: user.role,
           name: user.name
@@ -150,6 +168,10 @@ export default function LoginPage() {
               <p className="mt-1">superadmin@dentalclinic.com / password</p>
               <p className="mt-1">doctor@dentalclinic.com / password</p>
               <p className="mt-1">receptionist@dentalclinic.com / password</p>
+              <p className="mt-1 font-medium">Specific Doctor Credentials:</p>
+              <p className="mt-1">dr.john.doe@dentalclinic.com / password123</p>
+              <p className="mt-1">dr.emily.smith@dentalclinic.com / password123</p>
+              <p className="mt-2 italic">Receptionists can assign doctors when adding new patients</p>
             </div>
           </CardContent>
         </Card>
