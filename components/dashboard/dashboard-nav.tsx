@@ -135,7 +135,7 @@ export default function DashboardNav({ userRole, userEmail }: { userRole: string
     <React.Fragment key={item.href}>
       <Link
         href={item.href}
-        className="block px-4  rounded-lg text-sm hover:bg-primary transition text-white hover:text-white"
+        className="block px-4 py-2 rounded-lg text-sm hover:bg-primary transition text-white hover:text-white"
         onClick={() => setIsOpen(false)}
       >
         {item.label}
@@ -156,7 +156,7 @@ export default function DashboardNav({ userRole, userEmail }: { userRole: string
 
 
         {/* User Info */}
-        <div className="px-4 pt-2 border-t border-white/10">
+        <div className="p-4 border-t border-white/10">
           <div className="text-sm mb-2">
             <p className="font-medium truncate">{userEmail}</p>
             <p className="text-white/70 capitalize">{userRole?.replace("_", " ")}</p>
