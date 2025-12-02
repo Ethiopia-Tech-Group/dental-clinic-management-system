@@ -169,9 +169,9 @@ export default function LoginPage() {
               <p className="mt-1">doctor@dentalclinic.com / password</p>
               <p className="mt-1">receptionist@dentalclinic.com / password</p>
               <p className="mt-1 font-medium">Specific Doctor Credentials:</p>
-              <p className="mt-1">dr.john.doe@dentalclinic.com / password123</p>
+              {/* <p className="mt-1">dr.john.doe@dentalclinic.com / password123</p> */}
               <p className="mt-1">dr.emily.smith@dentalclinic.com / password123</p>
-              <p className="mt-2 italic">Receptionists can assign doctors when adding new patients</p>
+              {/* <p className="mt-2 italic">Receptionists can assign doctors when adding new patients</p> */}
             </div>
           </CardContent>
         </Card>
